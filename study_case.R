@@ -28,6 +28,8 @@ print('Solution:')
 print(result1$objval)
 # 0
 print(result1$solution)
+write.csv(list(EVobj = result1$objval, EVsol = result1$solution), "EVsol.csv")
+
 # 1.03 0.84 1.15 2.01 1.28 2.40 1.22 0.87 0.00 0.00 0.00 0.00 0.00 0.00 0.00 0.00
 ####################################################################################
 #####################################################################################
@@ -49,6 +51,8 @@ result2 <- lp(model2$modelsense, model2$obj, model2$A, model2$sense, model2$rhs)
 print('Solution:')
 print(result2$objval)
 print(result2$solution)
+
+write.csv(list(EVVobj = result2$objval, EVVsol = result2$solution), "EVVsol.csv")
 #######################################################################################33
 ##########################################################################################
 #Recourse model 
@@ -71,6 +75,7 @@ result3 <- lp(model3$modelsense, model3$obj, model3$A, model3$sense, model3$rhs)
 print('Solution:')
 print(result3$objval)
 print(result3$solution[1:n])
+write.csv(list(RMobj = result3$objval, RMsol = result3$solution), "RMsol.csv")
 ################################################################################################3
 ##########################################################################################3333
 # Wait and see model
