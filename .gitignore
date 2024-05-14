@@ -1,4 +1,11 @@
 EVsol.csv
 EVVsol.csv
 RMsol.csv
+EVsol.mps
+EVVsol.mps
+RMsol.mps
+EEVresult.txt
+EVmod.txt
+
 *.bak
+.Rhistory

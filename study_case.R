@@ -1,15 +1,13 @@
 library("lpSolve")
+# install.packages("linprog")
+library("linprog")
 # Parameters 
 n = 8
 S = 1000
 M = 10.93
 nu = c(1.03, 0.84, 1.15, 2.01, 1.28, 2.40, 1.22, 0.87)
 W = diag(n) + rbind(rep(0,n) ,cbind( - 1 *diag(n-1), rep(0, n-1)))
-omega = matrix(0, n, S)
-for (i in 1:n) {
-  omega[i,] =  rexp(S, rate = 1/nu[i])
-  
-}
+
 ############################################################################
 ############################################################################
 # Expected Value problem: EV
@@ -21,6 +19,8 @@ model1$A = rbind(c(rep(1,n), rep(0,n)), cbind(diag(n), W))
 model1$rhs = c(M, nu)
 model1$sense = c("<=", rep(">=", n))
 
+write(a<- print(model1), "EVmod.txt")
+
 result1 <- lp(model1$modelsense, model1$obj, model1$A, model1$sense, model1$rhs)
 
 
@@ -28,28 +28,56 @@ print('Solution:')
 print(result1$objval)
 # 0
 print(result1$solution)
+
+write.csv(list(EVobj = result1$objval, EVsol = result1$solution), "EVsol.csv")
 # 1.03 0.84 1.15 2.01 1.28 2.40 1.22 0.87 0.00 0.00 0.00 0.00 0.00 0.00 0.00 0.00
 ####################################################################################
 #####################################################################################
 # Expected result problem EVV 
-x_bar = c(1.03, 0.84, 1.15, 2.01, 1.28, 2.40, 1.22, 0.87)
-x_bar_S = rep(x_bar, S)
-WS = diag(n*S) + rbind(rep(0,n*S), cbind( - 1 *diag(n*S-1), rep(0, n*S-1)))
-for (i in 1: S-1) {
-  WS[i*n + 1, i*n] = 0 
-}
+x_EV = c(1.03, 0.84, 1.15, 2.01, 1.28, 2.40, 1.22, 0.87)
+
+set.seed(48643)
+
+rep = 50
+S = 5000
 model2 = list()
 model2$modelsense <- "min"
-model2$obj = rep(1/S, n*S)
-model2$A = WS
-model2$rhs = c(omega) - x_bar_S
-model2$sense = rep(">=", n*S)
-result2 <- lp(model2$modelsense, model2$obj, model2$A, model2$sense, model2$rhs)
+model2$obj = c(rep(1,n))
+model2$W = W
+model2$sense = rep(">=", n)
 
 
-print('Solution:')
-print(result2$objval)
-print(result2$solution)
+EEVs = c()
+for (it in 1:rep) { # Multiple Replications Procedure
+  print(it)
+  omega = matrix(rexp(S*n, rate = 1/nu),n)
+#  # Control input data
+#  rbind(nu= nu,
+#    means = apply(omega, 1, mean), # Check means
+#    sd = apply(omega, 1, sd)) # Check sd
+  
+  objVals2 <- c()
+  for (s in 1:S) {
+    model2$rhs = omega[,s] - x_EV
+    objVals2 <- c(objVals2,
+                  lp(model2$modelsense, model2$obj, model2$W, model2$sense, model2$rhs)$objval)
+  }
+  EEVs = c(EEVs, mean(objVals2))
+}
+
+bestEEV = min(EEVs)
+cat("Mean: ", mean(EEVs) )
+cat("sd: ", sd(EEVs) )
+cat("Relative error: ", sd(EEVs)/mean(EEVs)*100, "%" )
+cat("Minimum EEV value: ", bestEEV)
+cat('EV: ', result1$objval)
+
+write(paste(paste("Mean: ", mean(EEVs), "\n" ),
+            paste("sd: ", sd(EEVs) , "\n"),
+            paste("Relative error: ", sd(EEVs)/mean(EEVs)*100, "%" , "\n"),
+            paste("Minimum EEV value: ", bestEEV , "\n"),
+            paste('EV: ', result1$objval)),
+      "EEVresult.txt")
 ######
 # question d
 x_prop = c(1.04, 0.85, 1.16, 2.03, 1.29, 2.42, 1.23, 0.88)
