@@ -1,6 +1,4 @@
 library("lpSolve")
-# install.packages("linprog")
-library("linprog")
 # Parameters 
 n = 8
 S = 1000
@@ -81,33 +79,49 @@ write(paste(paste("Mean: ", mean(EEVs), "\n" ),
 ######
 # question d
 x_prop = c(1.04, 0.85, 1.16, 2.03, 1.29, 2.42, 1.23, 0.88)
-x_prop_S = rep(x_prop, S)
+omega3 = matrix(rexp(S*n, rate = 1/nu),n)
+objVals3 = c()
+for (s in 1:S) {
+  d = max(omega3[1,s] - x_prop[1], 0)
+  for (i in 2:n) {
+    d = c(d, max(omega3[i,s] - x_prop[i] + d[i-1], 0) )
+  }
+  objVals3 = c(objVals3, sum(d))
+}
+cat("Average objective value for proportionality approach:", mean(objVals3))
 
-model22 = list()
-model22$modelsense <- "min"
-model22$obj = rep(1/S, n*S)
-model22$A = WS
-model22$rhs = c(omega) - x_prop_S
-model22$sense = rep(">=", n*S)
-result22 <- lp(model22$modelsense, model22$obj, model22$A, model22$sense, model22$rhs)
-
-
-print('Solution:')
-print(result22$objval)
+# model22 = list()
+# model22$modelsense <- "min"
+# model22$obj = rep(1/S, n*S)
+# model22$A = WS
+# model22$rhs = c(omega) - x_prop_S
+# model22$sense = rep(">=", n*S)
+# result22 <- lp(model22$modelsense, model22$obj, model22$A, model22$sense, model22$rhs)
+# 
+# 
+# print('Solution:')
+# print(result22$objval)
 #######################################################################################33
 ##########################################################################################
-#Recourse model 
+#Recourse model
+set.seed(8733)
+S = 1000
 x_S = diag(n)
 for (i in 1:(S-1)) {
   x_S = rbind(x_S, diag(n))
 }
+WS = diag(n*S) + rbind(rep(0,n*S), cbind( - 1 *diag(n*S-1), rep(0, n*S-1)))
+for (i in 1: S-1) {
+  WS[i*n + 1, i*n] = 0 
+}
 
+omegaRM = matrix(rexp(S*n, rate = 1/nu),n)
 
 model3 = list()
 model3$modelsense = "min"
 model3$obj = c(rep(0,n), rep(1/S, n*S))
 model3$A = rbind(c(rep(1,n), rep(0,n*S)), cbind(x_S, WS))
-model3$rhs = c(M,c(omega)) 
+model3$rhs = c(M,c(omegaRM)) 
 model3$sense = c("<=", rep(">=", n*S))
 
 result3 <- lp(model3$modelsense, model3$obj, model3$A, model3$sense, model3$rhs)
