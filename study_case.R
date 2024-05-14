@@ -16,7 +16,7 @@ for (i in 1:n) {
 
 model1 = list()
 model1$modelsense <- "min"
-model1$obj = cbind(rep(0,n), rep(1,n))
+model1$obj = c(rep(0,n), rep(1,n))
 model1$A = rbind(c(rep(1,n), rep(0,n)), cbind(diag(n), W))
 model1$rhs = c(M, nu)
 model1$sense = c("<=", rep(">=", n))
@@ -50,6 +50,22 @@ result2 <- lp(model2$modelsense, model2$obj, model2$A, model2$sense, model2$rhs)
 print('Solution:')
 print(result2$objval)
 print(result2$solution)
+######
+# question d
+x_prop = c(1.04, 0.85, 1.16, 2.03, 1.29, 2.42, 1.23, 0.88)
+x_prop_S = rep(x_prop, S)
+
+model22 = list()
+model22$modelsense <- "min"
+model22$obj = rep(1/S, n*S)
+model22$A = WS
+model22$rhs = c(omega) - x_prop_S
+model22$sense = rep(">=", n*S)
+result22 <- lp(model22$modelsense, model22$obj, model22$A, model22$sense, model22$rhs)
+
+
+print('Solution:')
+print(result22$objval)
 #######################################################################################33
 ##########################################################################################
 #Recourse model 
@@ -72,6 +88,18 @@ result3 <- lp(model3$modelsense, model3$obj, model3$A, model3$sense, model3$rhs)
 print('Solution:')
 print(result3$objval)
 print(result3$solution[1:n])
+print(sum(result3$solution[1:n]))
+
+########
+### question c
+count = 0
+dum = result3$solution[(n+1):((n+1)*S)]
+for (i in seq(8, (n*S), by = 8)) {
+  if (dum[i] > 3) {
+    count = count + 1
+  } 
+}
+
 ################################################################################################3
 ##########################################################################################3333
 # Wait and see model
