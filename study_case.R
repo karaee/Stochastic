@@ -8,7 +8,7 @@ W = diag(n) + rbind(rep(0,n) ,cbind( - 1 *diag(n-1), rep(0, n-1)))
 
 ############################################################################
 ############################################################################
-# Expected Value problem: EV
+# Expected Value problem: EV################################################
 
 model1 = list()
 model1$modelsense <- "min"
@@ -31,7 +31,7 @@ write.csv(list(EVobj = result1$objval, EVsol = result1$solution), "EVsol.csv")
 # 1.03 0.84 1.15 2.01 1.28 2.40 1.22 0.87 0.00 0.00 0.00 0.00 0.00 0.00 0.00 0.00
 ####################################################################################
 #####################################################################################
-# Expected result problem EVV 
+# Expected result EVV  ################################################
 x_EV = c(1.03, 0.84, 1.15, 2.01, 1.28, 2.40, 1.22, 0.87)
 
 set.seed(48643)
@@ -43,7 +43,6 @@ model2$modelsense <- "min"
 model2$obj = c(rep(1,n))
 model2$W = W
 model2$sense = rep(">=", n)
-
 
 EEVs = c()
 for (it in 1:rep) { # Multiple Replications Procedure
@@ -77,7 +76,7 @@ write(paste(paste("Mean: ", mean(EEVs), "\n" ),
             paste('EV: ', result1$objval)),
       "EEVresult.txt")
 ######
-# question d
+# question d################################################
 x_prop = c(1.04, 0.85, 1.16, 2.03, 1.29, 2.42, 1.23, 0.88)
 omega3 = matrix(rexp(S*n, rate = 1/nu),n)
 objVals3 = c()
@@ -103,7 +102,7 @@ cat("Average objective value for proportionality approach:", mean(objVals3))
 # print(result22$objval)
 #######################################################################################33
 ##########################################################################################
-#Recourse model
+#Recourse model ################################################
 set.seed(8733)
 S = 1000
 x_S = diag(n)
@@ -133,7 +132,7 @@ print(result3$solution[1:n])
 print(sum(result3$solution[1:n]))
 
 ########
-### question c
+### question c ################################################
 count = 0
 dum = result3$solution[(n+1):((n+1)*S)]
 for (i in seq(8, (n*S), by = 8)) {
@@ -142,23 +141,27 @@ for (i in seq(8, (n*S), by = 8)) {
   } 
 }
 
-################################################################################################3
-##########################################################################################3333
-# Wait and see model
-X_ws = matrix(0,S, n*S)
-for (i in 1:S) {
-  X_ws[i, ((i-1)*n +1) :(i*n)] = rep(1,n)
-}
-model4 = list()
-model4$modelsense <- "min"
-model4$obj = cbind(rep(0,n*S), rep(1/S, n*S))
-model4$A =rbind(cbind(X_ws, matrix(0, S, n*S)), cbind(diag(n*S), WS))
-model4$rhs = c(rep(M, S),c(omega)) 
-model4$sense = c(rep("<=",S), rep(">=", n*S))
+################################################################################################
+#########################################################################################
+# Wait and see model ################################################
+set.seed(1327)
+S = 5000
+omegaWS = matrix(rexp(S*n, rate = 1/nu),n)
 
-result4 <- lp(model4$modelsense, model4$obj, model4$A, model4$sense, model4$rhs)
+objValsWS <- c()
+solsWS <- c()
+for (s in 1:S) {
+  modelWS = list()
+  modelWS$modelsense <- "min"
+  modelWS$obj = c(rep(0,n), rep(1,n))
+  modelWS$A = rbind(c(rep(1,n), rep(0,n)), cbind(diag(n), W))
+  modelWS$rhs = c(M, omegaWS[,s])
+  modelWS$sense = c("<=", rep(">=", n))
+  resultWS <- lp(modelWS$modelsense, modelWS$obj, modelWS$A, modelWS$sense, modelWS$rhs)
+  objValsWS <- c(objValsWS, resultWS$objval)
+  solsWS <- c(resultWS$solution)
+}
 
 
 print('Solution:')
-print(result4$objval)
-print(result4$solution[1:n])
+print(mean(objValsWS))
