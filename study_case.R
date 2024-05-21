@@ -76,19 +76,6 @@ write(paste(paste("Mean: ", mean(EEVs), "\n" ),
             paste('EV: ', result1$objval)),
       "EEVresult.txt")
 ######
-# question d################################################
-set.seed(7867)
-x_prop = c(1.04, 0.85, 1.16, 2.03, 1.29, 2.42, 1.23, 0.88)
-omega3 = matrix(rexp(S*n, rate = 1/nu),n)
-objVals3 = c()
-for (s in 1:S) {
-  d = max(omega3[1,s] - x_prop[1], 0)
-  for (i in 2:n) {
-    d = c(d, max(omega3[i,s] - x_prop[i] + d[i-1], 0) )
-  }
-  objVals3 = c(objVals3, sum(d))
-}
-cat("Average objective value for proportionality approach:", mean(objVals3))
 
 # model22 = list()
 # model22$modelsense <- "min"
@@ -132,18 +119,6 @@ print(result3$objval)
 print(result3$solution[1:n])
 print(sum(result3$solution[1:n]))
 
-########
-### question c ################################################
-count = 0
-dum = result3$solution[(n+1):((n+1)*S)]
-for (i in seq(8, (n*S), by = 8)) {
-  if (dum[i] > 3) {
-    count = count + 1
-  } 
-}
-
-################################################################################################
-#########################################################################################
 # Wait and see model ################################################
 set.seed(1327)
 S = 5000
@@ -166,3 +141,47 @@ for (s in 1:S) {
 
 print('Solution:')
 print(mean(objValsWS))
+
+########
+### question c ################################################
+count = 0
+dum = result3$solution[(n+1):((n+1)*S)]
+for (i in seq(8, (n*S), by = 8)) {
+  if (dum[i] > 3) {
+    count = count + 1
+  } 
+}
+
+################################################################################################
+#########################################################################################
+
+
+# question d################################################
+# Proportional Model ####
+set.seed(7867)
+x_prop = c(1.04, 0.85, 1.16, 2.03, 1.29, 2.42, 1.23, 0.88)
+omega3 = matrix(rexp(S*n, rate = 1/nu),n)
+objVals3 = c()
+for (s in 1:S) {
+  d = max(omega3[1,s] - x_prop[1], 0)
+  for (i in 2:n) {
+    d = c(d, max(omega3[i,s] - x_prop[i] + d[i-1], 0) )
+  }
+  objVals3 = c(objVals3, sum(d))
+}
+cat("Average objective value for proportionality approach:", mean(objVals3))
+
+# Expected value of TS Solution ####
+
+set.seed(1253)
+x_TS = result3$solution[1:n]
+omegaDts = matrix(rexp(S*n, rate = 1/nu),n)
+objVals3 = c()
+for (s in 1:S) {
+  d = max(omegaDts[1,s] - x_TS[1], 0)
+  for (i in 2:n) {
+    d = c(d, max(omegaDts[i,s] - x_TS[i] + d[i-1], 0) )
+  }
+  objVals3 = c(objVals3, sum(d))
+}
+cat("Average objective value for TS approach:", mean(objVals3))
