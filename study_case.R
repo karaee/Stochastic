@@ -77,6 +77,7 @@ write(paste(paste("Mean: ", mean(EEVs), "\n" ),
       "EEVresult.txt")
 ######
 # question d################################################
+set.seed(7867)
 x_prop = c(1.04, 0.85, 1.16, 2.03, 1.29, 2.42, 1.23, 0.88)
 omega3 = matrix(rexp(S*n, rate = 1/nu),n)
 objVals3 = c()
