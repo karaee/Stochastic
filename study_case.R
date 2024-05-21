@@ -104,7 +104,19 @@ for (s in 1:S) {
 print('Solution:')
 print(mean(objValsWS))
 
-########
+### question b: Sensitivity #############
+objValsB <- c()
+solsB <- c()
+for (M_b in seq(9.5, 12.5, 0.5)) {
+  model3$rhs = c(M_b,c(omegaRM))
+  newResult <- lp(model3$modelsense, model3$obj, model3$A, model3$sense, model3$rhs)
+  objValsB <- c(objValsB, newResult$objval)
+  solsB <- rbind(solsB, newResult$solution[1:n])
+}
+cat('M: ', seq(9.5, 12.5, 0.5), '\n')
+cat('Obj: ', objValsB, '\n')
+cat('x: \n', solsB, '\n')
+
 ### question c ################################################
 S = 2000
 count = 0
